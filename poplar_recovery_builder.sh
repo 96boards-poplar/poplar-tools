@@ -42,7 +42,7 @@ ANDROID_USER_DATA_IMAGE=userdata.img
 MOUNT=mount		# mount point for disk image; also output directory
 
 # Directory in which copies of output files are created
-RECOVERY=recovery_files
+RECOVERY=image_files
 
 # This is the ultimate output file
 USB_SIZE=4000000	# A little under 2 GB in sectors
