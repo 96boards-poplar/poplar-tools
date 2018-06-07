@@ -18,7 +18,7 @@ EMMC_SIZE=14942208	# 7296 MB in sectors (not hex)
 CHUNK_SIZE=524288	# Partition image chuck size in sectors (not hex)
 
 IN_ADDR=0x08000000	# Buffer address for compressed data in from USB (hex)
-OUT_ADDR=0x10000000	# Buffer address for uncompressed data for MMC (hex)
+OUT_ADDR=0x18000000	# Buffer address for uncompressed data for MMC (hex)
 SUB_ADDR=0x07800000	# Buffer address for sub-installer scripts
 
 EMMC_DEV=/dev/mmcblk0	# Linux path to main eMMC device on target
@@ -118,7 +118,7 @@ function parseargs() {
 	PARTS=$1
 	shift
 
-	LOAD_COMMAND=tftp
+	LOAD_COMMAND=tftpboot
 	INPUT_FILES=""
 
 	while [ $# -gt 0 ]; do
