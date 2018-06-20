@@ -930,10 +930,10 @@ partition_init
 partition_define 8191   none loader
 if [ "${IMAGE_TYPE}" = Android ]; then
 	partition_define    81920 none android_boot
-	partition_define  1687551 ext4 android_system
+	partition_define  3145727 ext4 android_system
 	partition_define       -1 none extended
-	partition_define   409599 ext4 android_vendor
-	partition_define  2097151 ext4 android_cache
+	partition_define   524287 ext4 android_vendor
+	partition_define  524287 ext4 android_cache
 	partition_define       -1 ext4 android_user_data
 else
 	partition_define 262144 vfat /boot
