@@ -38,6 +38,7 @@ DEVICE_TREE_BINARY=hi3798cv200-poplar.dtb
 ############
 ANDROID_BOOT_IMAGE=boot.img
 ANDROID_SYSTEM_IMAGE=system.img
+ANDROID_VENDOR_IMAGE=vendor.img
 ANDROID_CACHE_IMAGE=cache.img
 ANDROID_USER_DATA_IMAGE=userdata.img
 
@@ -95,9 +96,10 @@ function usage() {
 	echo "    boot          build boot partition only" >&2
 	echo "    loader_boot   build loader and boot partitions only" >&2
 	echo "    system        build system partition only" >&2
+	echo "    vendor        build vendor partition only" >&2
 	echo "    cache         build android cache partition only" >&2
 	echo "    userdata      build android userdata partition only" >&2
-	echo "    android       build android boot, system, cache and userdata partitions" >&2
+	echo "    android       build android boot, system, vendor, cache and userdata partitions" >&2
 	echo >&2
 	echo "  -a|--android" >&2
 	echo "    Build Android images instead of Linux" >&2
@@ -131,7 +133,7 @@ function parseargs() {
 	done
 
 	case ${PARTS} in
-	cache|userdata|android)
+	vendor|cache|userdata|android)
 		IMAGE_TYPE=Android
 	esac
 
@@ -141,6 +143,11 @@ function parseargs() {
 			INPUT_FILES="${INPUT_FILES} ANDROID_SYSTEM_IMAGE"
 		else
 			INPUT_FILES="${INPUT_FILES} ROOT_FS_ARCHIVE"
+		fi
+		;;&
+	all|android|vendor)
+		if [ "${IMAGE_TYPE}" = Android ]; then
+			INPUT_FILES="${INPUT_FILES} ANDROID_VENDOR_IMAGE"
 		fi
 		;;&
 	all|android|cache)
@@ -166,7 +173,7 @@ function parseargs() {
 		;;&
 	layout|layout_loader)
 		;;&
-	all|android|system|cache|userdata|boot|loader|loader_boot|layout_loader|layout)
+	all|android|system|vendor|cache|userdata|boot|loader|loader_boot|layout_loader|layout)
 		# this is required to prevent an invalid arg from triggering
 		# an invalid partition error below
 		;;
@@ -273,6 +280,7 @@ function map_description() {
 	/boot)			PART_BOOT=${part_number} ;;
 	android_boot)		PART_ANDROID_BOOT=${part_number} ;;
 	android_system)		PART_ANDROID_SYSTEM=${part_number} ;;
+	android_vendor)		PART_ANDROID_VENDOR=${part_number} ;;
 	android_cache)		PART_ANDROID_CACHE=${part_number} ;;
 	android_user_data)	PART_ANDROID_USER_DATA=${part_number} ;;
 	*)			;;	# We don't care about any others
@@ -335,6 +343,10 @@ function partition_define() {
 	android_system)		PART_ANDROID_SYSTEM=${part_number}
 				PART_TYPE[${PART_ANDROID_SYSTEM}]=0x83
 				PART_FSTYPE[${PART_ANDROID_SYSTEM}]=ext4
+				;;
+	android_vendor)		PART_ANDROID_VENDOR=${part_number}
+				PART_TYPE[${PART_ANDROID_VENDOR}]=0x83
+				PART_FSTYPE[${PART_ANDROID_VENDOR}]=ext4
 				;;
 	android_cache)		PART_ANDROID_CACHE=${part_number}
 				PART_TYPE[${PART_ANDROID_CACHE}]=0x83
@@ -696,6 +708,13 @@ function populate_android_system() {
 	populate_simage ${part_number} ${ANDROID_SYSTEM_IMAGE}
 }
 
+function populate_android_vendor() {
+	local part_number=$1
+
+	echo "- Android vendor"
+	populate_simage ${part_number} ${ANDROID_VENDOR_IMAGE}
+}
+
 function populate_android_cache() {
 	local part_number=$1
 
@@ -911,8 +930,9 @@ partition_init
 partition_define 8191   none loader
 if [ "${IMAGE_TYPE}" = Android ]; then
 	partition_define    81920 none android_boot
-	partition_define  2097151 ext4 android_system
+	partition_define  1687551 ext4 android_system
 	partition_define       -1 none extended
+	partition_define   409599 ext4 android_vendor
 	partition_define  2097151 ext4 android_cache
 	partition_define       -1 ext4 android_user_data
 else
@@ -969,6 +989,14 @@ if [ "${PARTS}" = "all" ] || [ "${PARTS}" = "android" ] || \
 	else
 		[ "${PART_ROOT}" ] && populate_root ${PART_ROOT}
 		# We won't populate the other file systems for now
+	fi
+fi
+
+if [ "${PARTS}" = "all" ] || [ "${PARTS}" = "android" ] || \
+	[ "${PARTS}" = "vendor" ] ; then
+	if [ "${IMAGE_TYPE}" = Android ]; then
+		[ "${PART_ANDROID_VENDOR}" ] &&
+			populate_android_vendor ${PART_ANDROID_VENDOR}
 	fi
 fi
 
