@@ -21,7 +21,7 @@ IN_ADDR=0x08000000	# Buffer address for compressed data in from USB (hex)
 OUT_ADDR=0x18000000	# Buffer address for uncompressed data for MMC (hex)
 SUB_ADDR=0x07800000	# Buffer address for sub-installer scripts
 
-EMMC_DEV=/dev/mmcblk0	# Linux path to main eMMC device on target
+EMMC_DEV="${EMMC_DEV:-/dev/mmcblk0}" # Linux path to main eMMC device on target
 
 # Recommended alignment (in sectors) for partitions other than 1 and 4
 PART_ALIGNMENT=2048	# Align at 1MB (512-byte sectors)
