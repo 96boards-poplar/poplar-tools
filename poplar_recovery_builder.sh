@@ -469,6 +469,7 @@ function partition_mount() {
 }
 
 function partition_unmount() {
+	sync
 	sudo umount ${MOUNT} || nope "unable to unmount partition"
 	unset MOUNTED
 }
